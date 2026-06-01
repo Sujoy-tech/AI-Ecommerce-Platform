@@ -68,8 +68,12 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
+        <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground space-y-2">
           <p>© 2024 NexusAI Shop. AI-Integrated E-Commerce Platform. Built as a demonstration of modern AI/ML capabilities.</p>
+          <p>
+            Built by <a href="https://github.com/Sujoy-tech" className="font-semibold text-foreground hover:underline">Sujoy Halder</a> | 
+            <a href="https://github.com/Sujoy-tech/AI-Ecommerce-Platform" className="ml-2 font-semibold text-foreground hover:underline">View on GitHub</a>
+          </p>
         </div>
       </div>
     </footer>
