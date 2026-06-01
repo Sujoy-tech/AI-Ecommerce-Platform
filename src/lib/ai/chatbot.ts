@@ -1,4 +1,5 @@
 import { HfInference } from "@huggingface/inference";
+import { prisma } from "@/lib/prisma";
 
 const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
@@ -22,6 +23,59 @@ If you don't know something, say so honestly. Never make up product details or p
 Format your responses with clear structure using markdown when appropriate.`;
 
 /**
+ * Fetch relevant products from database based on user query
+ */
+async function getRelevantProducts(query: string, limit: number = 5): Promise<any[]> {
+  try {
+    // Search for products by keywords in name/description or category
+    const keywords = query.toLowerCase().split(" ");
+    
+    const products = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        OR: [
+          {
+            name: {
+              search: keywords.join(" | "),
+            },
+          },
+          {
+            description: {
+              search: keywords.join(" | "),
+            },
+          },
+          {
+            category: {
+              in: keywords.map(k => 
+                k.charAt(0).toUpperCase() + k.slice(1)
+              ),
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        comparePrice: true,
+        category: true,
+        brand: true,
+        rating: true,
+        reviewCount: true,
+        tags: true,
+      },
+      take: limit,
+    });
+
+    return products;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return [];
+  }
+}
+
+/**
  * Generate AI chatbot response using Hugging Face's free inference API
  * Uses Mistral-7B or similar open-source LLM
  */
@@ -30,17 +84,33 @@ export async function generateChatResponse(
   context?: ChatContext
 ): Promise<string> {
   try {
+    const userMessage = messages[messages.length - 1]?.content || "";
+    
+    // Check if user is asking for product recommendations or product-related info
+    const isProductQuery = /recommend|suggest|find|looking for|best|good|product|price|where|how much|show|category/i.test(userMessage);
+    
+    let productContext = "";
+    if (isProductQuery) {
+      const products = await getRelevantProducts(userMessage, 3);
+      if (products.length > 0) {
+        productContext = "\n\nRelevant products from our catalog:\n" + 
+          products.map((p, i) => 
+            `${i + 1}. **${p.name}** ($${p.price}) - ${p.brand}\n   ${p.description.substring(0, 100)}...`
+          ).join("\n");
+      }
+    }
+
     // Build context-enriched prompt
     let contextPrompt = SYSTEM_PROMPT;
     
+    if (productContext) {
+      contextPrompt += productContext;
+    }
     if (context?.productContext) {
       contextPrompt += `\n\nCurrent product context: ${context.productContext}`;
     }
     if (context?.userPreferences) {
       contextPrompt += `\n\nUser preferences: ${context.userPreferences}`;
-    }
-    if (context?.orderHistory) {
-      contextPrompt += `\n\nRecent orders: ${context.orderHistory}`;
     }
 
     // Format messages for the model
@@ -76,7 +146,7 @@ function generateFallbackResponse(userMessage: string): string {
   const lowerMessage = userMessage.toLowerCase();
 
   if (lowerMessage.includes("recommend") || lowerMessage.includes("suggest")) {
-    return "I'd love to help you find the perfect product! Could you tell me more about what you're looking for? For example:\n- What category interests you?\n- What's your budget range?\n- Any specific features you need?";
+    return "I'd love to help you find the perfect product! Could you tell me more about what you're looking for? For example:\n- What category interests you? (Electronics, Fashion, Home & Kitchen, Furniture)\n- What's your budget range?\n- Any specific features you need?\n\nOur store has great selections across all categories!";
   }
 
   if (lowerMessage.includes("track") || lowerMessage.includes("order")) {
@@ -89,6 +159,10 @@ function generateFallbackResponse(userMessage: string): string {
 
   if (lowerMessage.includes("shipping")) {
     return "We offer free standard shipping on orders over $50. Shipping options:\n- **Standard**: 5-7 business days (Free over $50)\n- **Express**: 2-3 business days ($9.99)\n- **Next Day**: 1 business day ($19.99)";
+  }
+
+  if (lowerMessage.includes("category") || lowerMessage.includes("what do you have")) {
+    return "We have amazing products across these categories:\n- **Electronics** - Latest gadgets, cameras, audio equipment\n- **Fashion** - Clothing, shoes, accessories\n- **Home & Kitchen** - Appliances, tools, decor\n- **Furniture** - Office, bedroom, living room furniture\n\nWhich category interests you?";
   }
 
   return "I'm here to help! I can assist you with:\n- **Product recommendations** - Tell me what you're looking for\n- **Product comparisons** - Compare features and prices\n- **Order help** - Track orders or handle returns\n- **General questions** - Shipping, policies, etc.\n\nWhat would you like help with?";
