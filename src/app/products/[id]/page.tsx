@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -28,9 +28,33 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
 
+  const fetchProduct = useCallback(async () => {
+    try {
+      // In production, fetch from API
+      // For demo, using mock data
+      setProduct({
+        id: params.id,
+        name: "Premium Wireless Noise-Cancelling Headphones",
+        description: "Experience immersive audio with our flagship noise-cancelling headphones. Features 40-hour battery life, adaptive ANC, spatial audio support, and premium memory foam ear cushions. Perfect for audiophiles and professionals who demand the best sound quality.",
+        price: 349.99,
+        comparePrice: 449.99,
+        images: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800"],
+        category: "Electronics",
+        brand: "SoundWave Pro",
+        rating: 4.8,
+        reviewCount: 2456,
+        stock: 150,
+      });
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch product:", error);
+      setLoading(false);
+    }
+  }, [params.id]);
+
   useEffect(() => {
     fetchProduct();
-  }, [params.id]);
+  }, [fetchProduct]);
 
   const fetchProduct = async () => {
     try {

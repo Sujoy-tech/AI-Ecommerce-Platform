@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Filter, Grid, List, SlidersHorizontal } from "lucide-react";
 import { ProductCard } from "@/components/products/ProductCard";
@@ -29,11 +29,7 @@ export default function ProductsPage() {
   const [sort, setSort] = useState("newest");
   const [view, setView] = useState<"grid" | "list">("grid");
 
-  useEffect(() => {
-    fetchProducts();
-  }, [category, sort]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ sort });
@@ -47,7 +43,13 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [category, sort]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef } from "react";import Image from \"next/image\";import { motion } from "framer-motion";
 import { Search, Camera, Upload, Loader2, Sparkles, X } from "lucide-react";
 import { useSearchStore } from "@/lib/store";
 import { ProductCard } from "@/components/products/ProductCard";
@@ -144,9 +143,11 @@ export default function SearchPage() {
           >
             {imagePreview ? (
               <div className="relative inline-block">
-                <img
+                <Image
                   src={imagePreview}
                   alt="Search image"
+                  width={500}
+                  height={256}
                   className="max-h-64 rounded-2xl border-2 border-dashed border-gray-300"
                 />
                 <button
