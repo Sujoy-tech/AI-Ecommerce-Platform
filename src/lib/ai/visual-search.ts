@@ -79,10 +79,14 @@ export async function classifyProductImage(
 ): Promise<{ label: string; score: number }[]> {
   try {
     const imageBuffer = Buffer.from(imageBase64, "base64");
-    
+    const arrayBuffer = imageBuffer.buffer.slice(
+      imageBuffer.byteOffset,
+      imageBuffer.byteOffset + imageBuffer.byteLength
+    );
+
     const result = await hf.imageClassification({
       model: "google/vit-base-patch16-224",
-      data: imageBuffer,
+      data: arrayBuffer,
     });
 
     return result.slice(0, 5).map((r) => ({
@@ -103,10 +107,14 @@ export async function generateImageDescription(
 ): Promise<string> {
   try {
     const imageBuffer = Buffer.from(imageBase64, "base64");
-    
+    const arrayBuffer = imageBuffer.buffer.slice(
+      imageBuffer.byteOffset,
+      imageBuffer.byteOffset + imageBuffer.byteLength
+    );
+
     const result = await hf.imageToText({
       model: "Salesforce/blip-image-captioning-large",
-      data: imageBuffer,
+      data: arrayBuffer,
     });
 
     return result.generated_text || "Unable to describe the image.";
