@@ -56,39 +56,6 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [fetchProduct]);
 
-  const fetchProduct = async () => {
-    try {
-      // In production, fetch from API
-      // For demo, using mock data
-      setProduct({
-        id: params.id,
-        name: "Premium Wireless Noise-Cancelling Headphones",
-        description: "Experience immersive audio with our flagship noise-cancelling headphones. Features 40-hour battery life, adaptive ANC, spatial audio support, and premium memory foam ear cushions. Perfect for audiophiles and professionals who demand the best sound quality.",
-        price: 349.99,
-        comparePrice: 449.99,
-        images: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800"],
-        category: "Electronics",
-        brand: "SoundWave Pro",
-        rating: 4.8,
-        reviewCount: 2456,
-        stock: 150,
-        tags: ["headphones", "wireless", "noise-cancelling"],
-        attributes: {
-          "Battery Life": "40 hours",
-          "Driver Size": "40mm",
-          Connectivity: "Bluetooth 5.3",
-          "Noise Cancellation": "Adaptive ANC",
-          Weight: "250g",
-          "Charging": "USB-C, 3hr full charge",
-        },
-      });
-      setLoading(false);
-    } catch (error) {
-      console.error("Failed to fetch product:", error);
-      setLoading(false);
-    }
-  };
-
   const handleAddToCart = () => {
     if (!product) return;
     for (let i = 0; i < quantity; i++) {

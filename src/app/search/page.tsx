@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";import Image from \"next/image\";import { motion } from "framer-motion";
+import { useState, useRef } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
 import { Search, Camera, Upload, Loader2, Sparkles, X } from "lucide-react";
 import { useSearchStore } from "@/lib/store";
 import { ProductCard } from "@/components/products/ProductCard";
