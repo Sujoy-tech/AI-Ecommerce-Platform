@@ -36,12 +36,14 @@ async function getRelevantProducts(query: string, limit: number = 5): Promise<an
         OR: [
           {
             name: {
-              search: keywords.join(" | "),
+              contains: keywords[0],
+              mode: "insensitive",
             },
           },
           {
             description: {
-              search: keywords.join(" | "),
+              contains: keywords[0],
+              mode: "insensitive",
             },
           },
           {
