@@ -13,14 +13,17 @@ export async function visualSearch(
   limit: number = 10
 ): Promise<any[]> {
   try {
-    // Convert base64 to Blob for Hugging Face API
+    // Convert base64 to Buffer and then to ArrayBuffer for Hugging Face API
     const imageBuffer = Buffer.from(imageBase64, "base64");
-    const imageBlob = new Blob([imageBuffer], { type: "image/jpeg" });
-    
+    const arrayBuffer = imageBuffer.buffer.slice(
+      imageBuffer.byteOffset,
+      imageBuffer.byteOffset + imageBuffer.byteLength
+    );
+
     // Generate image caption first using image-to-text
     const captionResult = await hf.imageToText({
       model: "Salesforce/blip-image-captioning-base",
-      data: imageBlob,
+      data: arrayBuffer,
     });
 
     const imageDescription = captionResult.generated_text || "";
